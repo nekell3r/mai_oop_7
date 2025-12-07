@@ -52,10 +52,6 @@ class NPC : public std::enable_shared_from_this<NPC> {
 
   virtual bool Accept(std::shared_ptr<FightVisitor> visitor) = 0;
 
-  virtual bool Fight(std::shared_ptr<Bear> other) = 0;
-  virtual bool Fight(std::shared_ptr<Elf> other) = 0;
-  virtual bool Fight(std::shared_ptr<Robber> other) = 0;
-
   virtual void Print(std::ostream& os) const;
   virtual void Save(std::ostream& os) const;
 

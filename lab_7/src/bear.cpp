@@ -9,43 +9,24 @@ bool Bear::Accept(std::shared_ptr<FightVisitor> visitor) {
   return visitor->Visit(std::dynamic_pointer_cast<Bear>(shared_from_this()));
 }
 
-// Combat with dice: attack vs defense
-bool Bear::Fight(std::shared_ptr<Bear> other) {
-  if (!other || !other->IsAlive() || !IsAlive()) {
-    return false;
-  }
-  int attack = RollDice();
-  int defense = other->RollDice();
-  return attack > defense;
-}
-
-bool Bear::Fight(std::shared_ptr<Elf> other) {
-  if (!other || !other->IsAlive() || !IsAlive()) {
-    return false;
-  }
-  int attack = RollDice();
-  int defense = other->RollDice();
-  return attack > defense;
-}
-
-bool Bear::Fight(std::shared_ptr<Robber> other) {
-  if (!other || !other->IsAlive() || !IsAlive()) {
-    return false;
-  }
-  int attack = RollDice();
-  int defense = other->RollDice();
-  return attack > defense;
-}
-
-// Visitor implementation for Bear
-bool Bear::Visit(std::shared_ptr<Bear> defender) {
-  return Fight(defender);
+// Visitor implementation for Bear - contains fight logic
+// Bear kills Elves (with dice roll)
+bool Bear::Visit(std::shared_ptr<Bear> /*defender*/) {
+  // Bear cannot kill Bear
+  return false;
 }
 
 bool Bear::Visit(std::shared_ptr<Elf> defender) {
-  return Fight(defender);
+  if (!defender || !defender->IsAlive() || !IsAlive()) {
+    return false;
+  }
+  // Bear kills Elf - use dice roll
+  int attack = RollDice();
+  int defense = defender->RollDice();
+  return attack > defense;
 }
 
-bool Bear::Visit(std::shared_ptr<Robber> defender) {
-  return Fight(defender);
+bool Bear::Visit(std::shared_ptr<Robber> /*defender*/) {
+  // Bear cannot kill Robber
+  return false;
 }
