@@ -1,21 +1,24 @@
 #include "npc.hpp"
-#include "observer.hpp"
-#include "npc_types.hpp"
 
 #include <random>
 
+#include "npc_types.hpp"
+#include "observer.hpp"
+
+namespace lab7 {
 namespace {
-  int RollD6() {
-    thread_local std::random_device rd;
-    thread_local std::mt19937 gen(rd());
-    thread_local std::uniform_int_distribution<> dice(1, 6);
-    return dice(gen);
-  }
+
+int RollD6() {
+  thread_local std::random_device rd;
+  thread_local std::mt19937 gen(rd());
+  thread_local std::uniform_int_distribution<> dice(1, 6);
+  return dice(gen);
 }
+
+}  // namespace
 
 NPC::NPC(NpcType type, const std::string& name, int x, int y)
     : name_(name), x_(x), y_(y), type_(type), alive_(true) {
-  // Ensure coordinates are within map bounds (0-100)
   if (x_ < 0) x_ = 0;
   if (x_ > 100) x_ = 100;
   if (y_ < 0) y_ = 0;
@@ -30,21 +33,18 @@ void NPC::Subscribe(std::shared_ptr<IFightObserver> observer) {
 void NPC::FightNotify(const std::shared_ptr<NPC>& attacker,
                       const std::shared_ptr<NPC>& defender,
                       bool win) {
-  // Copy observers to avoid holding lock during callback
   std::vector<std::shared_ptr<IFightObserver>> observers_copy;
   {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     observers_copy = observers_;
   }
-  
-  // Call observers without holding lock
+
   for (const auto& observer : observers_copy) {
     observer->OnFight(attacker, defender, win);
   }
 }
 
 bool NPC::IsClose(const std::shared_ptr<NPC>& other, size_t distance) const {
-  // Lock in address order to prevent deadlock
   if (this < other.get()) {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     std::shared_lock<std::shared_mutex> other_lock(other->mutex_);
@@ -74,9 +74,8 @@ void NPC::Kill() {
 
 void NPC::Move(int new_x, int new_y) {
   std::unique_lock<std::shared_mutex> lock(mutex_);
-  if (!alive_) return;  // Dead NPCs don't move
-  
-  // Keep within map bounds
+  if (!alive_) return;
+
   if (new_x < 0) new_x = 0;
   if (new_x > 100) new_x = 100;
   if (new_y < 0) new_y = 0;
@@ -135,3 +134,5 @@ std::ostream& operator<<(std::ostream& os, const NPC& npc) {
   npc.Print(os);
   return os;
 }
+
+}  // namespace lab7

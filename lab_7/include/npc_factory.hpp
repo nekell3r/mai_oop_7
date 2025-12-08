@@ -1,10 +1,13 @@
 #pragma once
 
-#include <memory>
 #include <istream>
+#include <memory>
+#include <string>
 #include <vector>
 
 #include "npc.hpp"
+
+namespace lab7 {
 
 class NpcFactory {
  public:
@@ -20,4 +23,6 @@ class NpcFactory {
 
   static std::vector<std::shared_ptr<NPC>> LoadFromFile(const std::string& filename);
 };
+
+}  // namespace lab7
 

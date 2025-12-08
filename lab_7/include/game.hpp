@@ -1,14 +1,16 @@
 #pragma once
 
-#include <vector>
-#include <memory>
 #include <atomic>
+#include <condition_variable>
+#include <memory>
 #include <mutex>
 #include <queue>
-#include <condition_variable>
 #include <shared_mutex>
+#include <vector>
 
 #include "npc.hpp"
+
+namespace lab7 {
 
 struct CombatTask {
   std::shared_ptr<NPC> attacker;
@@ -45,4 +47,6 @@ class Game {
   std::vector<std::shared_ptr<NPC>> GetAliveNPCs() const;
   void PrintMap() const;
 };
+
+}  // namespace lab7
 

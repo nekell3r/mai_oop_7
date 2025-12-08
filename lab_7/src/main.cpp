@@ -1,9 +1,9 @@
-#include "game.hpp"
-
 #include <iostream>
 
+#include "game.hpp"
+
 int main() {
-  Game game;
+  lab7::Game game;
   
   std::cout << "Initializing game with 50 NPCs..." << std::endl;
   game.Initialize(50);

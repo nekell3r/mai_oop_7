@@ -1,22 +1,25 @@
 #include "game.hpp"
-#include "npc_factory.hpp"
-#include "fight_visitor.hpp"
-#include "observer.hpp"
 
+#include <algorithm>
+#include <chrono>
+#include <cmath>
 #include <iostream>
 #include <random>
-#include <chrono>
 #include <thread>
-#include <algorithm>
-#include <iomanip>
-#include <cmath>
 
+#include "fight_visitor.hpp"
+#include "npc_factory.hpp"
+#include "observer.hpp"
+
+namespace lab7 {
 namespace {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> coord_dist(0, 100);
-  std::uniform_int_distribution<> type_dist(1, 3);
-}
+
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_int_distribution<> coord_dist(0, 100);
+std::uniform_int_distribution<> type_dist(1, 3);
+
+}  // namespace
 
 Game::Game() : running_(false) {}
 
@@ -65,7 +68,6 @@ void Game::MovementThread() {
       int current_x = npc->GetX();
       int current_y = npc->GetY();
       
-      // Random direction and move by move_dist
       std::uniform_real_distribution<double> angle_dist(0.0, 2.0 * 3.14159265359);
       double angle = angle_dist(gen_local);
       
@@ -74,16 +76,14 @@ void Game::MovementThread() {
       
       npc->Move(new_x, new_y);
       
-      // Check for combat opportunities
-      // Use the same copy to avoid holding lock too long
-      if (!npc->IsAlive()) continue;  // Check once before loop
+      if (!npc->IsAlive()) continue;
       
       int kill_dist = npc->GetKillDistance();
       
       for (auto& other : npcs_copy) {
         if (npc == other) continue;
         if (!other->IsAlive()) continue;
-        if (!npc->IsAlive()) break;  // NPC might have been killed during iteration
+        if (!npc->IsAlive()) break;
         
         if (npc->IsClose(other, kill_dist)) {
           CombatTask task;
@@ -92,7 +92,6 @@ void Game::MovementThread() {
           
           {
             std::lock_guard<std::mutex> queue_lock(combat_queue_mutex_);
-            // Limit queue size to prevent overflow
             if (combat_queue_.size() < 500) {
               combat_queue_.push(task);
               combat_queue_cv_.notify_one();
@@ -119,7 +118,6 @@ void Game::CombatThread() {
     combat_queue_.pop();
     queue_lock.unlock();
     
-    // Check if both are still alive before combat
     bool attacker_alive = task.attacker->IsAlive();
     bool defender_alive = task.defender->IsAlive();
     
@@ -127,8 +125,6 @@ void Game::CombatThread() {
       continue;
     }
     
-    // Use visitor pattern for combat - check both directions
-    // Check if attacker can kill defender
     auto attacker_visitor = std::dynamic_pointer_cast<FightVisitor>(task.attacker);
     bool defender_killed = false;
     if (attacker_visitor && task.defender->Accept(attacker_visitor)) {
@@ -143,8 +139,6 @@ void Game::CombatThread() {
       }
     }
     
-    // Check if defender can kill attacker (both can die)
-    // Only check if attacker is still alive and defender wasn't killed
     if (task.attacker->IsAlive() && !defender_killed) {
       auto defender_visitor = std::dynamic_pointer_cast<FightVisitor>(task.defender);
       if (defender_visitor && task.defender->IsAlive() && task.attacker->Accept(defender_visitor)) {
@@ -178,7 +172,6 @@ void Game::MainThread() {
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
   
-  // Print final survivors
   {
     std::lock_guard<std::mutex> cout_lock(cout_mutex_);
     std::cout << "\n=== Game Over ===" << std::endl;
@@ -235,4 +228,6 @@ void Game::PrintMap() const {
     }
   }
 }
+
+}  // namespace lab7
 

@@ -2,6 +2,8 @@
 
 #include <memory>
 
+namespace lab7 {
+
 class Bear;
 class Elf;
 class Robber;
@@ -14,3 +16,5 @@ class FightVisitor {
   virtual bool Visit(std::shared_ptr<Elf> defender) = 0;
   virtual bool Visit(std::shared_ptr<Robber> defender) = 0;
 };
+
+}  // namespace lab7

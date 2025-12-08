@@ -1,14 +1,13 @@
 #pragma once
 
-#include <iostream>
 #include <memory>
+#include <ostream>
+#include <shared_mutex>
 #include <string>
 #include <vector>
-#include <cmath>
-#include <mutex>
-#include <shared_mutex>
 
-// Forward declarations
+namespace lab7 {
+
 class Bear;
 class Elf;
 class Robber;
@@ -45,7 +44,6 @@ class NPC : public std::enable_shared_from_this<NPC> {
   bool IsAlive() const;
   void Kill();
 
-  // Movement
   void Move(int new_x, int new_y);
   int GetMoveDistance() const;
   int GetKillDistance() const;
@@ -55,14 +53,14 @@ class NPC : public std::enable_shared_from_this<NPC> {
   virtual void Print(std::ostream& os) const;
   virtual void Save(std::ostream& os) const;
 
-  // Getters with thread safety
   std::string GetName() const;
   int GetX() const;
   int GetY() const;
   NpcType GetType() const;
 
-  // Roll 6-sided die for attack/defense
   int RollDice() const;
 
   friend std::ostream& operator<<(std::ostream& os, const NPC& npc);
 };
+
+}  // namespace lab7

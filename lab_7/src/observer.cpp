@@ -1,12 +1,22 @@
 #include "observer.hpp"
+
+#include <iostream>
+#include <string_view>
+
 #include "npc.hpp"
 #include "npc_types.hpp"
 
+namespace lab7 {
+
 namespace {
-  const char* NpcTypeToString(NpcType type) {
-    return NpcStats::GetTypeName(type);
-  }
+
+constexpr std::string_view kMurderPrefix = "MURDER: ";
+
+const char* NpcTypeToString(NpcType type) {
+  return NpcStats::GetTypeName(type);
 }
+
+}  // namespace
 
 std::mutex ConsoleObserver::cout_mutex_;
 
@@ -15,7 +25,7 @@ void ConsoleObserver::OnFight(const std::shared_ptr<NPC>& attacker,
                                bool win) {
   if (win) {
     std::lock_guard<std::mutex> lock(cout_mutex_);
-    std::cout << "MURDER: " << NpcTypeToString(attacker->GetType()) 
+    std::cout << kMurderPrefix << NpcTypeToString(attacker->GetType())
               << " \"" << attacker->GetName() << "\" killed "
               << NpcTypeToString(defender->GetType()) 
               << " \"" << defender->GetName() << "\"" << std::endl;
@@ -35,10 +45,11 @@ void FileObserver::OnFight(const std::shared_ptr<NPC>& attacker,
                             const std::shared_ptr<NPC>& defender,
                             bool win) {
   if (win && log_file_.is_open()) {
-    log_file_ << "MURDER: " << NpcTypeToString(attacker->GetType()) 
+    log_file_ << kMurderPrefix << NpcTypeToString(attacker->GetType()) 
               << " \"" << attacker->GetName() << "\" killed "
               << NpcTypeToString(defender->GetType()) 
               << " \"" << defender->GetName() << "\"" << std::endl;
   }
 }
 
+}  // namespace lab7

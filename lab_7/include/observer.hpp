@@ -1,9 +1,11 @@
 #pragma once
 
-#include <memory>
 #include <fstream>
-#include <iostream>
+#include <memory>
 #include <mutex>
+#include <string>
+
+namespace lab7 {
 
 class NPC;
 
@@ -37,4 +39,6 @@ class FileObserver : public IFightObserver {
                const std::shared_ptr<NPC>& defender,
                bool win) override;
 };
+
+}  // namespace lab7
 
